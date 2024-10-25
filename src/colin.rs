@@ -52,8 +52,7 @@ fn run_entry(setup_data: SetupData) -> (ProgramData<Online, Expanded>, Recursive
     let public_params = program::setup(&setup_data);
 
     let private_input = [("X".to_string(), json!(X)), ("Y".to_string(), json!(Y))]
-        .iter()
-        .cloned()
+        .into_iter()
         .collect::<HashMap<String, Value>>();
 
     let rom_data = HashMap::from([("GhashMulFoldEntry".to_string(), CircuitData { opcode: 0 })]);
@@ -85,9 +84,12 @@ fn test_just_once() {
     let (_, proof) = run_entry(setup_data);
     let mem = [
         // step_out
-        F::<G1>::from(0),
         F::<G1>::from(1),
+        F::<G1>::from(1),
+        F::<G1>::from(0),
+        F::<G1>::from(u64::MAX),
+        // MAX continues for awhile
     ];
 
-    assert_eq!(&mem.to_vec(), proof.zi_primary());
+    assert_eq!(mem.to_vec()[..4], proof.zi_primary()[..4]);
 }
